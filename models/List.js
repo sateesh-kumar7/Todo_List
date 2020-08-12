@@ -4,4 +4,4 @@ var listSchema = new mongoose.Schema({
     Item: String[]
 });
 
-module.exports = mongoose.model("Transaction",transactionSchema);
+module.exports = mongoose.model("List",transactionSchema);
