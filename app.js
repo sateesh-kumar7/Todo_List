@@ -125,9 +125,9 @@ app.put('/todo/check/:itemID', function (req, res) {
     console.log(x);
 });
 
-let port = process.env.PORT || 3000
+var PORT = process.env.PORT || 3000
 
-app.listen(port, () =>{
-    console.log('You are listening to port 3000');
+app.listen(PORT, function(){
+    console.log('Todo list server running');
 });
 
