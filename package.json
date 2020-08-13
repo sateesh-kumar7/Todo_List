@@ -20,10 +20,19 @@
     "mongo": "^0.1.0",
     "mongoose": "^5.9.28",
     "passport": "^0.4.1",
-    "passport-local": "^1.0.0"
+    "passport-local": "^1.0.0",
+    "passport-local-mongoose": "^6.0.1"
   },
   "devDependencies": {
     "dotenv": "^8.2.0",
     "nodemon": "^2.0.4"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sateesh-kumar7/Todo_List.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sateesh-kumar7/Todo_List/issues"
+  },
+  "homepage": "https://github.com/sateesh-kumar7/Todo_List#readme"
 }

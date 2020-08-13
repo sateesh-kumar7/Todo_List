@@ -37,7 +37,16 @@
             });
           });
 
-        });
+          $('input:checkbox').change(function () {
+            $.ajax({
+              type: 'POST',
+              url: '/todo/check/' + $(this).attr('id'),
+              success: function (data) {
+                location.reload();
+              }
+            });
+          });
+      }
     </script>
   </head>
   <body>
@@ -50,8 +59,17 @@
       <ul>
         <% for (var i = 0; i < todos.length; i++) { %>
           <input type="checkbox" id="<%=i%>">
+          <% if(!(todos[i].checked)){%>
           <li><%= todos[i].item %></li>
-        <% } %>
+          <% }} %>
+      </ul>
+    </div>
+    <div id="todo-table">
+      <ul>
+        <% for (var i = 0; i < todos.length; i++) { %>
+        <% if(todos[i].checked){%>
+        <li><%= todos[i].item %></li>
+        <% }} %>
       </ul>
     </div>
   </body>

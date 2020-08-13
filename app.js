@@ -1,8 +1,26 @@
 var express = require('express');
 
-var todoController = require('./controllers/todoController');
+var mongoose = require('mongoose');
 
 var app = express();
+
+var bodyParser = require('body-parser');
+
+var List = require("./models/List");
+
+var User = require("./models/User");
+
+mongoose.connect('mongodb+srv://test:test@todo.cegag.mongodb.net/todo?retryWrites=true&w=majority', { useNewUrlParser: true });
+
+var urlencodedParser = bodyParser.urlencoded({ extended: false });
+
+var LocalStrategy = require('passport-local');
+
+const bcrypt = require('bcrypt')
+const passport = require('passport')
+const flash = require('express-flash')
+const session = require('express-session')
+const methodOverride = require('method-override')
 
 app.set('view engine', 'ejs');
 
@@ -11,22 +29,6 @@ app.use(express.static('./public'));
 if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config()
 }
-
-const bcrypt = require('bcrypt')
-const passport = require('passport')
-const flash = require('express-flash')
-const session = require('express-session')
-const methodOverride = require('method-override')
-
-
-const initializePassport = require('./passport-config')
-initializePassport(
-    passport,
-    email => users.find(user => user.email === email),
-    id => users.find(user => user.id === id)
-)
-
-const users = []
 
 app.set('view-engine', 'ejs')
 app.use(express.urlencoded({ extended: false }))
@@ -40,19 +42,23 @@ app.use(passport.initialize())
 app.use(passport.session())
 app.use(methodOverride('_method'))
 
-app.get('/todo', checkAuthenticated, (req, res) => {
-    res.render('todo.ejs')
-})
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 app.get('/login', checkNotAuthenticated, (req, res) => {
     res.render('login.ejs')
 })
 
-app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
+app.post('/login', passport.authenticate('local', {
     successRedirect: '/todo',
     failureRedirect: '/login',
     failureFlash: true
-}))
+
+    }), 
+    function (req, res) {
+    console.log("Line#76" + req);
+});
 
 app.get('/register', checkNotAuthenticated, (req, res) => {
     res.render('register.ejs')
@@ -60,16 +66,15 @@ app.get('/register', checkNotAuthenticated, (req, res) => {
 
 app.post('/register', checkNotAuthenticated, async (req, res) => {
     try {
-        const hashedPassword = await bcrypt.hash(req.body.password, 10)
-        users.push({
-            id: Date.now().toString(),
-            name: req.body.name,
-            email: req.body.email,
-            password: hashedPassword
-        })
-        res.redirect('/login')
-    } catch {
-        res.redirect('/register')
+
+        var newItem = User(req.body).save(function (err, data) {
+            if (err) throw err;
+            res.redirect('/login');
+        });
+
+    } catch(err) {
+        console.log(err.message);
+        res.redirect('/register');
     }
 })
 
@@ -93,5 +98,40 @@ function checkNotAuthenticated(req, res, next) {
     next()
 }
 
-app.listen(3000);
-console.log('You are listening to port 3000');
+app.get('/todo', checkAuthenticated, function (req, res) {
+
+    List.find({}, function (err, data) {
+        if (err) throw err;
+        res.render('todo', { todos: data });
+    });
+});
+
+app.post('/todo', urlencodedParser, function (req, res) {
+
+    var newItem = List(req.body).save(function (err, data) {
+        if (err) throw err;
+        res.render('todo', { todos: data });
+    });
+});
+
+app.delete('/todo/:item', function (req, res) {
+
+    List.find({ item: req.params.item }).remove(function (err, data) {
+        if (err) throw err;
+        res.send(req.params.item);
+    });
+});
+
+app.put('/todo/check/:itemID', function (req, res) {
+    console.log(req.params.itemID);
+    var id = req.params.itemID;
+    var x = List.findOneAndUpdate({ _id: id }, { checked: true });
+    console.log(x);
+});
+
+let port = process.env.PORT || 3000
+
+app.listen(port, () =>{
+    console.log('You are listening to port 3000');
+});
+

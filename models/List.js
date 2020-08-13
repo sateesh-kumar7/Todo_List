@@ -1,7 +1,11 @@
 var mongoose = require("mongoose");
 
 var listSchema = new mongoose.Schema({
-    item: String
+    item: String,
+    checked: {
+        type: Boolean,
+        default: false
+    }
 });
 
 module.exports = mongoose.model("List", listSchema);
