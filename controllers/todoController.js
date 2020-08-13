@@ -1,30 +1,39 @@
 var bodyParser = require('body-parser');
 
-let data = [{item: 'get milk'}, {item: 'walk dog'}];
+var mongoose = require('mongoose');
+
+var List = require("../models/List");
+
+var complete =[];
+
+mongoose.connect('mongodb+srv://test:test@todo.cegag.mongodb.net/todo?retryWrites=true&w=majority', { useNewUrlParser: true });
+
 var urlencodedParser = bodyParser.urlencoded({extended: false});
 
 module.exports = function(app){
 
-app.get('/todo', function(req, res) {
-  res.render('todo', {todos: data});
-});
+  app.get('/todo', function(req, res) {
 
-app.post('/todo', urlencodedParser, function(req, res){
-  data.push(req.body);
-  res.render('todo', { todos: data });
+    List.find({}, function(err, data){
+      if(err) throw err;
+      res.render('todo', { todos: data});
+    });
+  });
 
-});
+  app.post('/todo', urlencodedParser, function(req, res){
 
-app.delete('/todo/:item', function (req, res) {
-  
-  data = data.filter(e => e.item !== req.params.item);
+    var newItem = List(req.body).save(function(err, data){
+      if(err) throw err;
+      res.render('todo', { todos: data});
+    });
+  });
 
-  res.send(req.params.item);
-});
-
-app.put('/todo', function(req, res){
-
-});
-
+  app.delete('/todo/:item', function (req, res) {
+    
+    List.find({item: req.params.item}).remove(function(err, data){
+      if(err) throw err;
+      res.send(req.params.item);
+    });
+  });
 
 };

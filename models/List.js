@@ -1,7 +1,7 @@
 var mongoose = require("mongoose");
 
 var listSchema = new mongoose.Schema({
-    Item: String[]
+    item: String
 });
 
-module.exports = mongoose.model("List",transactionSchema);
+module.exports = mongoose.model("List", listSchema);
