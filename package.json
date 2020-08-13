@@ -4,7 +4,7 @@
   "description": "A Website for Todo List",
   "main": "app.js",
   "scripts": {
-    "devStart": "nodemon app.js"
+    "devstart": "nodemon app.js"
   },
   "author": "Sateesh Kumar",
   "license": "ISC",
