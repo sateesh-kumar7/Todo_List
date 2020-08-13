@@ -54,11 +54,8 @@ app.post('/login', passport.authenticate('local', {
     successRedirect: '/todo',
     failureRedirect: '/login',
     failureFlash: true
-
     }), 
-    function (req, res) {
-    console.log("Line#76" + req);
-});
+);
 
 app.get('/register', checkNotAuthenticated, (req, res) => {
     res.render('register.ejs')
@@ -66,19 +63,16 @@ app.get('/register', checkNotAuthenticated, (req, res) => {
 
 app.post('/register', checkNotAuthenticated, async (req, res) => {
     try {
-
-        var newItem = User(req.body).save(function (err, data) {
-            if (err) throw err;
-            res.redirect('/login');
+        User.register(new User({ name: req.body.name, username: req.body.email }), req.body.password, function (err, newUser) {
+            console.log("line#84: " + newUser + "\n");
         });
-
-    } catch(err) {
-        console.log(err.message);
+        res.redirect('/login');
+    } catch {
         res.redirect('/register');
     }
 })
 
-app.delete('/logout', (req, res) => {
+app.get('/logout', (req, res) => {
     req.logOut()
     res.redirect('/login')
 })
@@ -117,7 +111,9 @@ app.post('/todo', urlencodedParser, function (req, res) {
 app.delete('/todo/:item', function (req, res) {
 
     List.find({ item: req.params.item }).remove(function (err, data) {
-        if (err) throw err;
+        if (err){
+            console.log(err);
+        };
         res.send(req.params.item);
     });
 });

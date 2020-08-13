@@ -7,61 +7,70 @@
     <script>
       $(document).ready(function () {
 
-          $('form').on('submit', function (event) {
-            event.preventDefault();
-            var item = $('form input');
-            var todo = { item: item.val() };
+        $('form').on('submit', function (event) {
+          event.preventDefault();
+          var item = $('form input');
+          var todo = { item: item.val() };
 
-            $.ajax({
-              type: 'POST',
-              url: '/todo',
-              data: todo,
-              success: function (data) {
-                location.reload();
-              }
-            });
-
-            return false;
-
+          $.ajax({
+            type: 'POST',
+            url: '/todo',
+            data: todo,
+            success: function (data) {
+              location.reload();
+            }
           });
+          return false;
+        });
 
-          $('li').on('click', function () {
-            var item = $(this).text();
+        $('form-logout').on('submit', function (event) {
+          event.preventDefault();
 
-            $.ajax({
-              type: 'DELETE',
-              url: '/todo/' + item,
-              success: function (data) {
-                location.reload();
-              }
-            });
+          $.ajax({
+            type: 'DELETE',
+            url: '/logout',
           });
+          return false;
+        });
 
-          $('input:checkbox').change(function () {
-            $.ajax({
-              type: 'POST',
-              url: '/todo/check/' + $(this).attr('id'),
-              success: function (data) {
-                location.reload();
-              }
-            });
+        $('li').on('click', function () {
+          var item = $(this).text();
+
+          $.ajax({
+            type: 'DELETE',
+            url: '/todo/' + item,
+            success: function (data) {
+              location.reload();
+            }
           });
-      }
+        });
+
+        $('input:checkbox').change(function () {
+          $.ajax({
+            type: 'POST',
+            url: '/todo/check/' + $(this).attr('id'),
+            success: function (data) {
+              location.reload();
+            }
+          });
+        });
+      });
     </script>
   </head>
   <body>
     <h1>My Todo List</h1>
     <div id = "todo-table">
-      <form action = "/todo" method="post">
+      <form action = "/todo" method="POST">
         <input type="text" name="item" placeholder="Add new item..." required>
-        <button type="submit">Add Item</button>
+        <button type="submit" name="action" value="save">Add Item</button>
       </form>
       <ul>
         <% for (var i = 0; i < todos.length; i++) { %>
           <input type="checkbox" id="<%=i%>">
           <% if(!(todos[i].checked)){%>
-          <li><%= todos[i].item %></li>
-          <% }} %>
+            <li><%= todos[i].item %></li>
+          <% }
+        } %>
       </ul>
     </div>
     <div id="todo-table">
@@ -72,5 +81,9 @@
         <% }} %>
       </ul>
     </div>
+    <div class= "lout">
+      <a href="/logout">Logout</a>
+    </div>
+    
   </body>
 </html>

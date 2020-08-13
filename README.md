@@ -11,10 +11,8 @@ A Website for Todo List that includes the features for the user who can perform 
 
 - Delete Items
 
-The project includes seed.js file which was written to populate the database with some initial users and items to get the system up and running. The user ids and password below which can be used to test the website functions:
-- sateesh.kumar,1234
-
-- zayan.ali,1234
+The user id and password below which can be used to test the website functions:
+- test@test.com, test
 
 ## Tech Stack:
 - Nodejs, express (Back-end)
