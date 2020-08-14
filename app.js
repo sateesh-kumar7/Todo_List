@@ -8,10 +8,6 @@ var mongoose = require('mongoose');
 
 var User = require('./models/User');
 
-var List = require("./models/List");
-
-var complete = [];
-
 mongoose.connect('mongodb+srv://test:test@todo.cegag.mongodb.net/todo?retryWrites=true&w=majority', { useNewUrlParser: true });
 
 var urlencodedParser = bodyParser.urlencoded({ extended: false });
@@ -42,8 +38,12 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(methodOverride('_method'));
-
-
+app.use(function (req, res, next) {
+    res.locals.currentUser = req.user;
+    res.locals.success = req.flash("success");
+    res.locals.error = req.flash("error");
+    next();
+});
 passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
@@ -60,9 +60,7 @@ app.post('/login', passport.authenticate('local', {
     successRedirect: '/todo',
     failureRedirect: '/login',
     failureFlash: true
-}), function (req, res) {
-    console.log("Line#76" + req);
-});
+}));
 
 app.get('/register', checkNotAuthenticated, (req, res) => {
     res.render('register.ejs');
@@ -84,6 +82,7 @@ app.delete('/logout', (req, res) => {
 })
 
 function checkAuthenticated(req, res, next) {
+
     if (req.isAuthenticated()) {
         return next();
     }
@@ -98,36 +97,38 @@ function checkNotAuthenticated(req, res, next) {
     next();
 }
 
-app.post('/todo/check/:itemID', function (req, res) {
-    var id = req.params.itemID;
-    var x = List.findOneAndUpdate({ _id: id }, { $set: { checked: true } }, function (err, updateCollection) {
+app.post('/todo/check/:item', function (req, res) {
+
+    console.log(req.body.item);
+    User.update({ 'list.item': req.params.item }, {
+        '$set': { 'list.$.checked': true }
+    },
+    function (err, updateCollection) {
         res.redirect("/todo");
-    });
+    })
 });
 
 app.get('/todo', checkAuthenticated, function (req, res) {
 
-    List.find({}, function (err, data) {
-        if (err) throw err;
-        console.log(data);
-        res.render('todo', { todos: data });
+    User.findOne({ _id: req.user._id }, function (err, data){
+        res.render('todo', { todos: data.list });
     });
 });
 
 app.post('/todo', urlencodedParser, function (req, res) {
 
-    var newItem = List(req.body).save(function (err, data) {
+    User.findOneAndUpdate({ _id: req.user._id }, { $push: { list: req.body} }, { new: true },function(err, data){
         if (err) throw err;
-        res.render('todo', { todos: data });
-    });
+        res.render('todo', { todos: data.list });
+    })
 });
 
 app.delete('/todo/:item', function (req, res) {
 
-    List.find({ item: req.params.item }).remove(function (err, data) {
+    User.findOneAndUpdate({ _id: req.user._id }, { $pull: { 'list': { item: req.params.item } } }, { new: true }, function (err, data) {
         if (err) throw err;
-        res.send(req.params.item);
-    });
+        res.render('todo', { todos: data.list });
+    })
 });
 
 app.get('/logout', (req, res) => {
@@ -140,4 +141,3 @@ var PORT = process.env.PORT || 3000
 app.listen(PORT, function(){
     console.log('Todo list server running');
 });
-

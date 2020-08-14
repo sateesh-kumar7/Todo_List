@@ -5,6 +5,15 @@ var userSchema = new mongoose.Schema({
     name: String,
     email: String,
     password: String,
+    list: [
+        {
+            item: String,
+            checked: {
+                type: Boolean,
+                default: false
+            }
+        }
+    ]
 });
 
 userSchema.plugin(passportLocalMongoose);

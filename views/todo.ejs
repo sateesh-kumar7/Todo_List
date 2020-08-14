@@ -38,7 +38,7 @@
         });
 
         $('input:checkbox').change(function () {
-          // alert($(this).attr('id'));
+
           $.ajax({
             type: 'POST',
             url: '/todo/check/' + $(this).attr('id'),
@@ -47,6 +47,7 @@
             }
           });
         });
+
       });
     </script>
   </head>
@@ -63,7 +64,7 @@
         <% if(!todos[i].checked){%>
         <div>
           <li><%= todos[i].item %></li>
-          <input style="float: right;" type="checkbox" id="<%=todos[i]._id%>">
+          <input style="float: right;" type="checkbox" id="<%=todos[i].item%>">
         </div>
         <% }} %>
       </ul>
